@@ -8,8 +8,9 @@
     Alert,
     Checkbox,
     Card,
+    Button,
   } from "flowbite-svelte";
-  import { ArrowDown, ArrowUp, Check } from "svelte-bootstrap-svg-icons";
+  import { ArrowDown, ArrowUp } from "svelte-bootstrap-svg-icons";
   import data from "$lib/data.js";
 
   export const snapshot = {
@@ -27,6 +28,24 @@
       {}
     );
   let list = listMemory();
+
+  function getAllValues(obj={}) {
+    return Object.values(obj).flat();
+  }
+
+  function filterObjByKey(obj = {}, callback = () => true) {
+    return Object.fromEntries(
+      Object.entries(obj).filter(([key]) => callback(key))
+    );
+  }
+
+  function isNotBonus(key) {
+    return !key.includes("bonus");
+  }
+
+  $: allRequired = getAllValues(filterObjByKey(list, isNotBonus)) ?? [];
+  $: allRequiredLength = allRequired.length;
+  $: allRequiredCheckedLength = allRequired.filter(Boolean).length;
 </script>
 
 <svelte:head>
@@ -37,17 +56,14 @@
   <Heading>Co s sebou na Karštejn?</Heading>
   <div class="stack">
     <P>
-      Máte strach z balení věcí? Vždy na něco zapomenete?<br />Projděte si náš
-      chytrý seznam.
-    </P>
-    <P>
-      Máte strach z balení věcí? Vždy na něco zapomenete?<br />Projděte si náš
-      chytrý seznam. Aby měly děti sebou všechno potřebné, připravili jsme
-      doporučený seznam věcí na dětský tábor
+      Máte strach z balení věcí? Vždy na něco zapomenete?<br />Aby měly děti s
+      sebou všechno potřebné, připravili jsme doporučený seznam věcí na dětský
+      tábor.
     </P>
     <P
       >Jednotlivé položky si můžete odškrtnout. Až se sem vrátíte, seznam si
-      bude pamatovat, co už máte odškrtnuté.</P
+      bude pamatovat, co už máte odškrtnuté. (informace se ukládá na vašem
+      zařízení)</P
     >
     <P>
       Máte radši v ruce papír nebo chcete seznam přibalit dětem s sebou? Seznam
@@ -89,8 +105,8 @@
               <span class="pl-2">{item}</span>
             </Label>
           {/each}
-          <Heading tag="h5">Nepovinné</Heading>
           {#if section.bonus?.length}
+            <Heading tag="h5">Nepovinné</Heading>
             {#each section.bonus as bonus, bonusIndex}
               <Label>
                 <Checkbox
@@ -105,15 +121,19 @@
     {/each}
   </div>
 
+  <Button on:click={() => (list = listMemory())}
+    >Smazat paměť {allRequiredCheckedLength}/{allRequiredLength}</Button
+  >
+
   <Heading tag="h2">Naše tipy</Heading>
   <div>
     <div class="cluster">
       <div style="align-items: flex-start;">
-        {#each data.tips.items as tip, tipIndex}
+        {#each data.tips.items as tip}
           <Card>
-            <Heading tag="h3">{tip.title}</Heading>
+            <Heading tag="h3" class="mb-2">{tip.title}</Heading>
             <div class="stack">
-              {#each tip.detail as p, itemIndex}
+              {#each tip.detail as p}
                 <P>{@html p}</P>
               {/each}
             </div>
@@ -128,6 +148,10 @@
     <P>K rychlému odbavení dětí při odjezdu, si prosím připravte:</P>
     <ul class="list-disc">
       <li>Originál přihlášky</li>
+      <li>
+        List účastníka (čestné prohlášení o bezinfekčnosti s datem odjezdu +
+        kontakt a info o dítěti)
+      </li>
       <li>Originál potvrzení od lékaře</li>
       <li>
         Potřebné léky, pokud je dítě po dobu tábora musí užívat společně s
@@ -153,12 +177,15 @@
     </ul>
   </div>
   <Alert
-    >Něco jsme zapomněli? Nevíte si rady nebo jen se chcete doptat? Neváhejte
-    se na nás obrátit. Rádi vám pomůžeme.</Alert
+    >Něco jsme zapomněli? Nevíte si rady nebo jen se chcete doptat? Neváhejte se
+    na nás obrátit. Rádi vám pomůžeme.</Alert
   >
   <ul>
     <li><A href="tel:+420604405795">+420 604 405 795</A> (Jáchym Janoušek)</li>
-    <li><A href="mailto:info(at)karstejn.org">info(at)karstejn.org</A> (Schránku kontrolujeme zpravidla 2x týdne)</li>
+    <li>
+      <A href="mailto:info(at)karstejn.org">info(at)karstejn.org</A> (Schránku kontrolujeme
+      zpravidla 2x týdne)
+    </li>
     <li><A href="https://www.karstejn.org">www.karstejn.org</A></li>
     <li><A href="https://www.facebook.com/LTKarstejn">facebook</A></li>
     <li><A href="https://www.instagram.com/karstejn">instagram</A></li>
